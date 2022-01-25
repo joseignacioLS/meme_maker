@@ -1,5 +1,4 @@
-import React, {useState} from "react"
-import data from "../memesData"
+import React, {useState, useEffect} from "react"
 
 
 export default function Main()
@@ -10,31 +9,48 @@ export default function Main()
         "randomImage":""
     });
 
+    const [memeData, setMemeData] = useState([])
 
-    const meme_list = data.data.memes;
+    useEffect(()=>{
+        fetch("https://api.imgflip.com/get_memes")
+        .then(res => res.json())
+        .then(data => setMemeData(data.data.memes))
+    },[])
 
 
+    function handleInput(event)
+    {
+        const {name, value} = event.target
+        setMeme(prevMeme => {
+            return {
+                ...prevMeme,
+                [name]: value
+            }
+        })
+    }
     function SelectRandomMeme()
     {
         setMeme(prevMeme => {
-                let r = Math.floor(Math.random() * meme_list.length);
+                let r = Math.floor(Math.random() * memeData.length);
                 return {
                     ...prevMeme,
-                    "randomImage": meme_list[r].url
+                    "randomImage": memeData[r].url
                 };
             })
     }
     return (
         <div className="container">
             <div className="container--input">
-                <input type="text" placeholder="Shut up"></input>
-                <input type="text" placeholder="And take my meme"></input>
+                <input type="text" placeholder="Shut up" name="topText" onChange={handleInput} value={meme.topText}></input>
+                <input type="text" placeholder="And take my meme" name="bottomText" onChange={handleInput} value={meme.bottomText}></input>
             </div>
             <div className="container--button">
                 <button onClick={SelectRandomMeme}>Get a new meme image</button>
             </div>
             <div className="container--meme">
-                <img id="meme" src={meme.randomImage} />
+                {meme.randomImage && <h2 className="meme--text topText">{meme.topText}</h2>}
+                {meme.randomImage && <h2 className="meme--text bottomText">{meme.bottomText}</h2>}
+                <img id="meme--image" src={meme.randomImage} />
             </div>
         </div>
     )
